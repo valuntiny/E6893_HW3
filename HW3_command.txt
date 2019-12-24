@@ -1,0 +1,44 @@
+### create cluster
+gcloud beta dataproc clusters create example-cluster \
+     --optional-components=ANACONDA,JUPYTER \
+     --image-version=preview --enable-component-gateway \
+     --metadata 'PIP_PACKAGES=requests_oauthlib google-cloud-bigquery
+     tweepy' \
+     --metadata gcs-connector-version=1.9.16 \
+     --metadata bigquery-connector-version=0.13.16 \
+     --project test-project-251000 \
+     --bucket big_data_hw \
+     --initialization-actions=gs://dataproc-initialization-actions/python/pip-install.sh,gs://dataproc-initialization-actions/connectors/connectors.sh \
+     --single-node \
+     --region us-central1
+
+
+### upload data
+gsutil cp ./Desktop/Myfile/EECS6893/HW3/twitterHTTPClient.py \
+    gs://big_data_hw/hw3/twitterHTTPClient.py
+
+
+### running HTTP client
+gcloud dataproc jobs submit pyspark ./Desktop/Myfile/EECS6893/HW3/twitterHTTPClient.py \
+    --project=test-project-251000 \
+    --region=us-central1 \
+    --cluster=example-cluster
+
+### kill job??
+gcloud dataproc jobs kill 12f9c1bab03a4212bdb9e5437e003263 \
+    --project=test-project-251000 \
+    --region=us-central1 \
+    --cluster=example-cluster1
+
+
+
+### create dataset and table
+bq mk bigdata_sparkStreaming:hashtags
+
+bq mk \
+--table \
+test-project-251000:bigdata_sparkStreaming.hashtags
+
+bq mk \
+--table \
+test-project-251000:bigdata_sparkStreaming.wordcount
